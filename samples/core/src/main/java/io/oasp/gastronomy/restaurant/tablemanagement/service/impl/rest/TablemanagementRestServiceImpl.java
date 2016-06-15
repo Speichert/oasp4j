@@ -1,14 +1,7 @@
 package io.oasp.gastronomy.restaurant.tablemanagement.service.impl.rest;
 
-import io.oasp.gastronomy.restaurant.tablemanagement.common.api.Table;
-import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.Tablemanagement;
-import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.to.TableEto;
-import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.to.TableSearchCriteriaTo;
-import io.oasp.module.jpa.common.api.to.PaginatedListTo;
-
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -23,6 +16,24 @@ import javax.ws.rs.core.MediaType;
 
 import net.sf.mmm.util.exception.api.ObjectNotFoundUserException;
 
+import org.owasp.appsensor.core.AppSensorClient;
+import org.owasp.appsensor.core.DetectionPoint;
+import org.owasp.appsensor.core.DetectionSystem;
+import org.owasp.appsensor.core.Event;
+import org.owasp.appsensor.core.IPAddress;
+import org.owasp.appsensor.core.User;
+import org.owasp.appsensor.core.event.EventManager;
+import org.owasp.appsensor.core.geolocation.GeoLocation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+import io.oasp.gastronomy.restaurant.tablemanagement.common.api.Table;
+import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.Tablemanagement;
+import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.to.TableEto;
+import io.oasp.gastronomy.restaurant.tablemanagement.logic.api.to.TableSearchCriteriaTo;
+import io.oasp.module.jpa.common.api.to.PaginatedListTo;
+
 /**
  * The service class for REST calls in order to execute the methods in {@link Tablemanagement}.
  *
@@ -32,7 +43,22 @@ import net.sf.mmm.util.exception.api.ObjectNotFoundUserException;
 @Named("TablemanagementRestService")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Configuration
+@ComponentScan("org.owasp.appsensor.event")
 public class TablemanagementRestServiceImpl {
+
+  // private DetectionSystem gastronomySense = new DetectionSystem("gastronomySense");
+
+  private DetectionPoint test;
+
+  @Autowired
+  EventManager eventManager;
+
+  /*
+   * @Autowired ClientConfiguration configuration;
+   */
+  @Autowired
+  private AppSensorClient appSensorClient;
 
   private Tablemanagement tableManagement;
 
@@ -41,10 +67,21 @@ public class TablemanagementRestServiceImpl {
    *
    * @param tableManagement the new value of the field tableManagement
    */
-  @Inject
+  @Autowired
   public void setTableManagement(Tablemanagement tableManagement) {
 
     this.tableManagement = tableManagement;
+  }
+
+  // @Autowired
+  // public void setRestEventManager(RestEventManager eventManager) {
+  //
+  // this.eventManager = eventManager;
+  // }
+  private DetectionSystem getDetectionSystem() {
+
+    return new DetectionSystem(
+        this.appSensorClient.getConfiguration().getServerConnection().getClientApplicationIdentificationHeaderValue());
   }
 
   /**
@@ -58,6 +95,16 @@ public class TablemanagementRestServiceImpl {
   public TableEto getTable(@PathParam("id") String id) {
 
     long idAsLong;
+    if (id.toLowerCase().contains("insert")) {
+      this.test = new DetectionPoint(DetectionPoint.Category.INPUT_VALIDATION, "IE1");
+      // TODO: JSON event typ
+      // warum keine Fehler?
+      // Überprüfen
+      User bob = new User("bob", new IPAddress("10.10.10.1", new GeoLocation(37.596758, -121.647992)));
+      // User user = new User(getUserName());
+      Event event = new Event(bob, this.test, getDetectionSystem());
+      this.eventManager.addEvent(event);
+    }
     if (id == null) {
       throw new BadRequestException("missing id");
     }
