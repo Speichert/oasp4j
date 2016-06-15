@@ -25,6 +25,14 @@
     <module>batch</module>
     <module>web</module>
     <module>basic</module>
+
+    <module>../../../../../Users/sspeiche/appsensor/access-controllers/appsensor-access-control-reference</module>
+    <module>../../../../../Users/sspeiche/appsensor/analysis-engines/appsensor-analysis-reference</module>
+    <module>../../../../../Users/sspeiche/appsensor/configuration-modes/appsensor-configuration-stax</module>
+    <module>../../../../../Users/sspeiche/appsensor/appsensor-core</module>
+    <module>../../../../../Users/sspeiche/appsensor/geolocators/appsensor-geolocation-geoip2</module>
+    <module>../../../../../Users/sspeiche/appsensor/execution-modes/appsensor-ws-rest-client</module>
+    <module>../../../../../Users/sspeiche/appsensor/execution-modes/appsensor-ws-rest-server</module>
   </modules>
 
   <dependencyManagement>
