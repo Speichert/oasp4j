@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<appsensor-client-config>
-<!--
- xmlns="https://www.owasp.org/index.php/OWASP_AppSensor_Project/xsd/appsensor_client_config_2.0.xsd"
+<appsensor-client-config
+xmlns="https://www.owasp.org/index.php/OWASP_AppSensor_Project/xsd/appsensor_client_config_2.0.xsd"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="https://www.owasp.org/index.php/OWASP_AppSensor_Project/xsd/appsensor_client_config_2.0.xsd
            appsensor_client_config_2.0.xsd">
-            -->
+
 	<server-connection type="rest">
 		<server-connection-config>
 			<url>http://localhost:8081/myapp/</url>
