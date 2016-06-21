@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<appsensor-server-config xmlns="https://www.owasp.org/index.php/OWASP_AppSensor_Project/xsd/appsensor_server_config_2.0.xsd">
-	
+<appsensor-server-config xmlns="https://github.com/Speichert/oasp4j/blob/develop/samples/core/src/main/resources/appsensor_server_config_2.0.xsd">
+
 	<client-application-identification-header-name>X-Appsensor-Client-Application-Name2</client-application-identification-header-name>
-	
+
 	<client-applications>
 		<client-application>
 			<name>myclientapp</name>
@@ -10,11 +10,11 @@
 				<role>ADD_EVENT</role>
 				<role>ADD_ATTACK</role>
 				<role>GET_RESPONSES</role>
-				<role>EXECUTE_REPORT</role>	
+				<role>EXECUTE_REPORT</role>
 			</roles>
 		</client-application>
 	</client-applications>
-	
+
 	<correlation-config>
 		<correlated-client-set>
 			<client-application-name>server1</client-application-name>
