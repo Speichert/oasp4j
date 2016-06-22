@@ -2,28 +2,25 @@ package io.oasp.gastronomy.restaurant.tablemanagement.service.impl.rest;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import net.sf.mmm.util.exception.api.ObjectNotFoundUserException;
 
-import org.owasp.appsensor.core.AppSensorClient;
 import org.owasp.appsensor.core.DetectionPoint;
 import org.owasp.appsensor.core.DetectionSystem;
 import org.owasp.appsensor.core.Event;
 import org.owasp.appsensor.core.IPAddress;
 import org.owasp.appsensor.core.User;
-import org.owasp.appsensor.core.event.EventManager;
+import org.owasp.appsensor.core.configuration.client.ClientConfiguration;
 import org.owasp.appsensor.core.geolocation.GeoLocation;
+import org.owasp.appsensor.event.RestEventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -47,18 +44,19 @@ import io.oasp.module.jpa.common.api.to.PaginatedListTo;
 @ComponentScan("org.owasp.appsensor.event")
 public class TablemanagementRestServiceImpl {
 
-  // private DetectionSystem gastronomySense = new DetectionSystem("gastronomySense");
+  private DetectionSystem gastronomySense = new DetectionSystem("gastronomySense");
 
   private DetectionPoint test;
 
   @Autowired
-  EventManager eventManager;
+  RestEventManager eventManager;
+
+  @Autowired
+  ClientConfiguration configuration;
 
   /*
-   * @Autowired ClientConfiguration configuration;
+   * @Autowired private AppSensorClient appSensorClient;
    */
-  @Autowired
-  private AppSensorClient appSensorClient;
 
   private Tablemanagement tableManagement;
 
@@ -67,7 +65,7 @@ public class TablemanagementRestServiceImpl {
    *
    * @param tableManagement the new value of the field tableManagement
    */
-  @Autowired
+  @Inject
   public void setTableManagement(Tablemanagement tableManagement) {
 
     this.tableManagement = tableManagement;
@@ -78,21 +76,14 @@ public class TablemanagementRestServiceImpl {
   //
   // this.eventManager = eventManager;
   // }
-  private DetectionSystem getDetectionSystem() {
-
-    return new DetectionSystem(
-        this.appSensorClient.getConfiguration().getServerConnection().getClientApplicationIdentificationHeaderValue());
-  }
-
-  /**
-   * Delegates to {@link Tablemanagement#findTable}.
-   *
-   * @param id the ID of the {@link TableEto}
-   * @return the {@link TableEto}
+  /*
+   * private DetectionSystem getDetectionSystem() {
+   * 
+   * return new DetectionSystem(
+   * this.appSensorClient.getConfiguration().getServerConnection().getClientApplicationIdentificationHeaderValue()); }
    */
-  @GET
-  @Path("/table/{id}/")
-  public TableEto getTable(@PathParam("id") String id) {
+
+  public TableEto getTable(String id) {
 
     long idAsLong;
     if (id.toLowerCase().contains("insert")) {
@@ -102,7 +93,7 @@ public class TablemanagementRestServiceImpl {
       // Überprüfen
       User bob = new User("bob", new IPAddress("10.10.10.1", new GeoLocation(37.596758, -121.647992)));
       // User user = new User(getUserName());
-      Event event = new Event(bob, this.test, getDetectionSystem());
+      Event event = new Event(bob, this.test, this.gastronomySense);
       this.eventManager.addEvent(event);
     }
     if (id == null) {
@@ -118,13 +109,6 @@ public class TablemanagementRestServiceImpl {
     return this.tableManagement.findTable(idAsLong);
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#findAllTables}.
-   *
-   * @return list of all existing restaurant {@link TableEto}s
-   */
-  @GET
-  @Path("/table/")
   @Deprecated
   public List<TableEto> getAllTables() {
 
@@ -132,68 +116,29 @@ public class TablemanagementRestServiceImpl {
     return allTables;
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#saveTable}.
-   *
-   * @param table the {@link TableEto} to be created
-   * @return the recently created {@link TableEto}
-   */
-  @POST
-  @Path("/table/")
   @Deprecated
   public TableEto createTable(TableEto table) {
 
     return this.tableManagement.saveTable(table);
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#saveTable}.
-   *
-   * @param table the {@link TableEto} to be created
-   * @return the recently created {@link TableEto}
-   */
-  @POST
-  @Path("/table/")
   public TableEto saveTable(TableEto table) {
 
     return this.tableManagement.saveTable(table);
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#deleteTable}.
-   *
-   * @param id ID of the {@link TableEto} to be deleted
-   */
-  @DELETE
-  @Path("/table/{id}/")
-  public void deleteTable(@PathParam("id") long id) {
+  public void deleteTable(long id) {
 
     this.tableManagement.deleteTable(id);
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#findFreeTables}.
-   *
-   * @return list of all existing free {@link TableEto}s
-   */
-  @GET
-  @Path("/freetables/")
   @Deprecated
   public List<TableEto> getFreeTables() {
 
     return this.tableManagement.findFreeTables();
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#isTableReleasable}.
-   *
-   * @param id ID of the {@link TableEto}
-   * @return {@code true} if the table could be released<br>
-   *         {@code false}, otherwise
-   */
-  @GET
-  @Path("/table/{id}/istablereleasable/")
-  public boolean isTableReleasable(@PathParam("id") long id) {
+  public boolean isTableReleasable(long id) {
 
     TableEto table = this.tableManagement.findTable(id);
     if (table == null) {
@@ -203,14 +148,6 @@ public class TablemanagementRestServiceImpl {
     }
   }
 
-  /**
-   * Delegates to {@link Tablemanagement#findTableEtos}.
-   *
-   * @param searchCriteriaTo the pagination and search criteria to be used for finding tables.
-   * @return the {@link PaginatedListTo list} of matching {@link TableEto}s.
-   */
-  @Path("/table/search")
-  @POST
   public PaginatedListTo<TableEto> findTablesByPost(TableSearchCriteriaTo searchCriteriaTo) {
 
     return this.tableManagement.findTableEtos(searchCriteriaTo);
